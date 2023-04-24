@@ -11,6 +11,7 @@ import (
 	"taynguyen/sample/src/cmd/router"
 	"taynguyen/sample/src/handler"
 	"taynguyen/sample/src/repo"
+	"taynguyen/sample/src/repo/orm"
 	"taynguyen/sample/src/utils"
 	"testing"
 
@@ -27,7 +28,7 @@ type OrderSuite struct {
 }
 
 func (s *OrderSuite) SetupSuite() {
-	println("SetupSuite")
+	// println("SetupSuite")
 	// Start server
 	ctx := context.Background()
 	if err := utils.InitializeSnowFlake(); err != nil {
@@ -57,13 +58,13 @@ func (s *OrderSuite) TearDownSuite() {
 }
 
 func (s *OrderSuite) SetupTest() {
-	println("SetupTest")
+	// println("SetupTest")
 	// Clean data
 	s.db.Exec(`DELETE FROM orders`)
 }
 
 func (s *OrderSuite) TearDownTest() {
-	println("TearDownTest")
+	// println("TearDownTest")
 }
 
 func (s *OrderSuite) TestPing() {
@@ -110,6 +111,40 @@ func (s *OrderSuite) Test_Create_Invalid_JSON_Should_Return_4xx() {
 	// THEN validate response
 	s.Equal(http.StatusBadRequest, res.StatusCode, "Status code should be 400")
 	s.Nil(err, "Error when call create order")
+}
+
+func (s *OrderSuite) Test_GetAll_Should_Return_All_Order() {
+	// GIVEN 2 orders in DB
+	order1 := &orm.Order{
+		Id:         1,
+		Title:      "Order 1",
+		CustomerId: 1,
+		Price:      100,
+	}
+	_, err := s.db.Model(order1).Insert()
+	s.Nil(err, "Error when insert order 1")
+
+	order2 := &orm.Order{
+		Id:         2,
+		Title:      "Order 2",
+		CustomerId: 2,
+		Price:      200,
+	}
+	_, err = s.db.Model(order2).Insert()
+	s.Nil(err, "Error when insert order 2")
+
+	// WHEN get all orders
+	res, err := http.Get(fmt.Sprintf("%s/orders", s.srv.URL))
+
+	// THEN validate response
+	s.Equal(http.StatusOK, res.StatusCode, "Status code should be 200")
+	s.Nil(err, "Error when call create order")
+
+	body, err := io.ReadAll(res.Body)
+	s.Nil(err, "Error when read body")
+	orders := []*handler.OrderResponse{}
+	s.Nil(json.Unmarshal(body, &orders), "Error when unmarshal body")
+	s.Equal(2, len(orders), "Should return 2 orders")
 }
 
 // In order for 'go test' to run this suite, we need to create

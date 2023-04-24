@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
+	"taynguyen/sample/src/cmd/router"
 	"taynguyen/sample/src/handler"
 	"taynguyen/sample/src/repo"
 	"taynguyen/sample/src/utils"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-pg/pg/v10"
 )
 
@@ -31,20 +32,19 @@ func main() {
 
 	repo := repo.New(db)
 	h := handler.New(repo)
-	startServer(h) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	StartServer(h) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
-func startServer(h *handler.Handler) {
-	r := gin.Default()
+func StartServer(h *handler.Handler) *http.Server {
+	r := router.CreateRouter(h)
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
+	}
 
-	r.POST("/order", h.CreateOrder)
-	r.GET("/orders", h.GetOrders)
-
-	r.Run()
+	if err := srv.ListenAndServe(); err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
+	return srv
 }

@@ -8,15 +8,20 @@ import (
 
 type Repo interface {
 	Order() order.IRepo
+
+	// DoInTx(fn func(repo *pg.Tx) error) error
 }
 
 func New(db *pg.DB) Repo {
 	return &impl{
+		db:    db,
 		order: order.New(db),
 	}
 }
 
 type impl struct {
+	db *pg.DB
+
 	order order.IRepo
 }
 

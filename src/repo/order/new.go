@@ -13,7 +13,7 @@ type IRepo interface {
 }
 
 type impl struct {
-	db *pg.DB
+	db pg.DBI
 }
 
 func New(db *pg.DB) IRepo {

@@ -24,6 +24,7 @@ type OrderResponse struct {
 
 func (h Handler) CreateOrder(c *gin.Context) {
 	o := &NewOrderRq{}
+
 	if err := c.BindJSON(o); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "invalid request",

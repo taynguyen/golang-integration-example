@@ -22,3 +22,7 @@ migrate:
 .PHONY: run
 run:
 	go run src/cmd/main.go
+
+.PHONY: test
+test:
+	go test -timeout 30s -run $^TestOrderSuite$$ taynguyen/sample/tests/order -v

@@ -2,8 +2,6 @@ include .env
 export $(shell sed 's/=.*//' .env)
 
 
-init-local: pg
-
 DOCKER_COMPOSE_BIN := docker-compose
 COMPOSE := ${DOCKER_COMPOSE_BIN} -p tn-sample -f docker-compose.yaml
 

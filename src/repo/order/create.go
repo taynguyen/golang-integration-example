@@ -6,9 +6,6 @@ import (
 )
 
 func (i impl) Create(o orm.Order) (orm.Order, error) {
-	// i.db.RunInTransaction(context.Background(), func(tx *pg.Tx) error {
-	// 	return nil
-	// })
 	o.Id = utils.GenerateSnowflakeID()
 	_, err := i.db.Model(&o).Insert()
 	return o, err
